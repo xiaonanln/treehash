@@ -38,7 +38,7 @@ const (
 
 // OutputPath 默认的输出文件路径
 const OutputPath = "treehash.txt"
-const WorkerCount = 1000
+const WorkerCount = 100
 
 var waitWorkers sync.WaitGroup
 var waitHashWorker sync.WaitGroup
