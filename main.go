@@ -50,7 +50,7 @@ type workItem struct {
 	Info os.FileInfo
 }
 
-var hashQueue = make(chan hashItem, 100)
+var hashQueue = make(chan hashItem, 1000)
 
 type hashItem struct {
 	File string
@@ -83,40 +83,6 @@ func hashwriter(output string) {
 	}
 	waitHashWorker.Done()
 }
-
-//func createWriter(output string) {
-//	for node := range hashChanel {
-//		file, err := os.Open(node.Path)
-//		if err != nil {
-//			fmt.Println(err.Error())
-//			os.Exit(-1)
-//		}
-//		hash := sha1.New()
-//		if _, ioErr := io.Copy(hash, file); ioErr != nil {
-//			fmt.Println(ioErr.Error())
-//			os.Exit(-1)
-//		}
-//
-//		if closeErr := file.Close(); closeErr != nil {
-//			fmt.Println(closeErr.Error())
-//			os.Exit(-1)
-//		}
-//
-//		fd, fileErr := os.OpenFile(output, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
-//		if fileErr != nil {
-//			fmt.Println("hash file error: ", fileErr.Error())
-//			os.Exit(-1)
-//		}
-//
-//		data := fmt.Sprintf("%s,%x,%d\n", node.Path, hash.Sum(nil), node.Size)
-//		buf := []byte(data)
-//		fd.Write(buf)
-//		if fdErr := fd.Close(); fdErr != nil {
-//			fmt.Println(fdErr.Error())
-//			os.Exit(-1)
-//		}
-//	}
-//}
 
 // Traverse 遍历目录
 func Traverse(rootpath string, filter string, output string) int {
@@ -190,6 +156,8 @@ func displayHelp() {
 }
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
 	beginTime := time.Now()
 	root := flag.String("root", "", "要生成hash树的根目录")
 	filter := flag.String("filter", "", "过滤目录或文件，支持通配符")
@@ -212,8 +180,6 @@ func main() {
 	if hasHelp && *root == "" {
 		os.Exit(0)
 	}
-
-	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	if result := Traverse(*root, *filter, *output); result != Success {
 		os.Exit(-1)
